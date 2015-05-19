@@ -50,7 +50,7 @@ module Anemone
       # accept cookies from the server and send them back?
       :accept_cookies => false,
       # skip any link with a query string? e.g. http://foo.com/?u=user
-      :skip_query_strings => false,
+      :skip_query_strings => true,
       # proxy server hostname 
       :proxy_host => nil,
       # proxy server port number
@@ -198,7 +198,7 @@ module Anemone
         if link_queue.size < @opts[:link_limit] and !@end_crawl
           links = links_to_follow page
           links.each do |link|
-            link_queue << [link, page.url.dup, page.depth + 1]
+            link_queue << [link, page.url.dup, page.depth + 1] unless !visit_link?(link) 
           end
           @pages.touch_keys links
         end
@@ -326,7 +326,7 @@ module Anemone
     # it has a query string and +skip_query_strings+ is true.
     #
     def skip_query_string?(link)
-      @opts[:skip_query_strings] && link.query
+      @opts[:skip_query_strings] && !link.query.to_s.empty?
     end
 
     #
