@@ -1,3 +1,7 @@
+== 0.8.2 / 2015-05-19
+* Bugfixing skip query string options
+* not currently compatable with mongo 2.x +  work to correct pending.
+
 == 0.8.1 / 2015-03-18
 * Add options to :skip_no_follow => false and :follow_subdomain => true
 * If :skip_no_follow => true, all links or pages that have nofollow tag will be ignore
