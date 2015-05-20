@@ -50,7 +50,7 @@ module Anemone
       # accept cookies from the server and send them back?
       :accept_cookies => false,
       # skip any link with a query string? e.g. http://foo.com/?u=user
-      :skip_query_strings => true,
+      :skip_query_strings => false,
       # proxy server hostname 
       :proxy_host => nil,
       # proxy server port number
