@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name = "anemone"
-  s.version = "0.8.2"
+  s.version = "0.8.3"
   s.author = ["Chris Kite", "Pheonix7284"]
   s.homepage = "https://github.com/Pheonix7284/anemone"
   s.rubyforge_project = "anemone"

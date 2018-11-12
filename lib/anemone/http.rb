@@ -41,7 +41,8 @@ module Anemone
                                       :redirect_to => redirect_to,
                                       :response_time => response_time,
                                       :skip_no_follow => @opts[:skip_no_follow],
-                                      :follow_subdomain => @opts[:follow_subdomain])
+                                      :follow_subdomain => @opts[:follow_subdomain],
+                                      :original_urls => @opts[:original_urls])
         end
 
         return pages
@@ -177,7 +178,7 @@ module Anemone
 
       rescue Timeout::Error, EOFError, Errno::ECONNREFUSED, Errno::ETIMEDOUT, Errno::ECONNRESET => e
         retries += 1
-        puts "[medusa] Retrying ##{retries} on url #{url} because of: #{e.inspect}" if verbose?
+        puts "[anemone] Retrying ##{retries} on url #{url} because of: #{e.inspect}" if verbose?
         sleep(3 ^ retries)
         retry unless retries > RETRY_LIMIT
       ensure

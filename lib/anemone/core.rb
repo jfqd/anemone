@@ -61,11 +61,12 @@ module Anemone
       :skip_no_follow => false,
       # Follow subdomain
       :follow_subdomain => true,
-      #number of crawled pages queued
+      # number of crawled pages queued
       :pages_queue_limit => 1000,
-      #number of unique links collected per crawl
-      :link_limit => 500000
-
+      # number of unique links collected per crawl
+      :link_limit => 500000,
+      # should we can outgoing external links?
+      :scan_outgoing_external_links => false
     }
 
     # Create setter methods for all options to be called from the crawl block
@@ -90,6 +91,8 @@ module Anemone
       @after_crawl_blocks = []
       @opts = opts
       @end_crawl = false
+
+      @opts[:original_urls] = (@opts[:scan_outgoing_external_links] ? urls : false)
 
       if @opts[:follow_subdomain].is_a?(Array)
         @opts[:follow_subdomain] |= get_domains
@@ -194,7 +197,6 @@ module Anemone
         do_page_blocks page
         page.discard_doc! if @opts[:discard_page_bodies]
 
-        
         if link_queue.size < @opts[:link_limit] and !@end_crawl
           links = links_to_follow page
           links.each do |link|

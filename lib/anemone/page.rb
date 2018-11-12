@@ -38,18 +38,21 @@ module Anemone
       @url = url
       @data = OpenStruct.new
 
-      @code = params[:code]
       @headers = params[:headers] || {}
       @headers['content-type'] ||= ['']
-      @aliases = Array(params[:aka]).compact
-      @referer = params[:referer]
-      @depth = params[:depth] || 0
-      @redirect_to = to_absolute(params[:redirect_to])
-      @response_time = params[:response_time]
-      @body = params[:body]
-      @error = params[:error]
-      @skip_no_follow = params[:skip_no_follow]
+
+      @code             = params[:code]
+      @aliases          = Array(params[:aka]).compact
+      @referer          = params[:referer]
+      @depth            = params[:depth] || 0
+      @redirect_to      = to_absolute(params[:redirect_to])
+      @response_time    = params[:response_time]
+      @body             = params[:body]
+      @error            = params[:error]
+      @skip_no_follow   = params[:skip_no_follow]
       @follow_subdomain = params[:follow_subdomain]
+      @original_urls    = params[:original_urls]
+      @external         = external_page?
 
       @fetched = !params[:code].nil?
     end
@@ -62,6 +65,7 @@ module Anemone
       @links = []
       return @links if !doc
       return @links if no_index?
+      return [] if external_page?
 
       docs = 
         if @skip_no_follow
@@ -74,7 +78,8 @@ module Anemone
         u = a['href']
         next if u.nil? or u.empty?
         abs = to_absolute(u) rescue next
-        @links << abs if in_domain?(abs) || is_subdomain?(u)
+        
+        @links << abs if in_domain?(abs) || is_subdomain?(u) || crawl_page?
       end
       @links.uniq!
       @links
@@ -104,6 +109,9 @@ module Anemone
       @fetched
     end
 
+    def referer
+      @referer.to_s
+    end
     #
     # Array of cookies received with this page as WEBrick::Cookie objects.
     #
@@ -194,6 +202,16 @@ module Anemone
     def in_domain?(uri)
       uri.host == @url.host
     end
+    
+    def external_page?
+      return false if @referer.nil? || @referer == '' || @original_urls == false
+      !@original_urls.include?(@url.host)
+    end
+    
+    def crawl_page?
+      return false if @referer.nil? || @referer == '' || @original_urls == false
+      @url.host == URI(referer).host
+    end
 
     def is_subdomain?(link)
       @follow_subdomain && @follow_subdomain.include?(link.get_domain)
@@ -219,6 +237,8 @@ module Anemone
        'referer' => @referer.to_s,
        'redirect_to' => @redirect_to.to_s,
        'response_time' => @response_time,
+       'original_urls' => @original_urls,
+       'external' => @external,
        'fetched' => @fetched}
     end
 
@@ -234,6 +254,8 @@ module Anemone
        '@referer' => hash['referer'],
        '@redirect_to' => (!!hash['redirect_to'] && !hash['redirect_to'].empty?) ? URI(hash['redirect_to']) : nil,
        '@response_time' => hash['response_time'].to_i,
+       '@original_urls' => hash['original_urls'],
+       '@external' => hash['external'],
        '@fetched' => hash['fetched']
       }.each do |var, value|
         page.instance_variable_set(var, value)
